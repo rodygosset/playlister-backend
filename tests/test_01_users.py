@@ -305,7 +305,7 @@ def test_delete_user_401_login():
 
 def test_delete_user():
     """
-    Make sure that a DELETE at '/api/users/{username}':
+    Make sure that a DELETE at '/api/users/me':
     - returns the deleted User object when nothing goes wrong
     """
     # log in as test
