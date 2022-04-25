@@ -44,8 +44,8 @@ def db_populate(db: Session):
     test_pwd = "testpassword123"
     crud.create_user(db, schemas.UserCreate(
             username="test",
-            firstName="Test",
-            familyName="Test",
+            first_name="Test",
+            family_name="Test",
             email="test@example.com",
             hashed_password=get_password_hash(test_pwd)
     ))

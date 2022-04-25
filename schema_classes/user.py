@@ -11,14 +11,14 @@ from pydantic import BaseModel
 
 class UserBase(BaseModel):
     username: str
-    firstName: str
-    familyName: str
+    first_name: str
+    family_name: str
     email: str
 
 class UserCreate(BaseModel):
     username: str
-    firstName: str
-    familyName: str
+    first_name: str
+    family_name: str
     email: str
     hashed_password: str
 
@@ -26,8 +26,8 @@ class UserCreate(BaseModel):
 
 class UserUpdate(BaseModel):
     new_username: Optional[str]
-    firstName: Optional[str]
-    familyName: Optional[str]
+    first_name: Optional[str]
+    family_name: Optional[str]
     email: Optional[str]
     
 

@@ -46,8 +46,8 @@ client = TestClient(app)
 
 new_user = {
         "username": "test",
-        "firstName": "Test",
-        "familyName": "Test",
+        "first_name": "Test",
+        "family_name": "Test",
         "email": "test1@example.com",
         "hashed_password": "test1password123"
     }
@@ -165,8 +165,8 @@ def test_get_current_user():
     expected_data = {
         "id": 1,
         "username": "test",
-        "firstName": "Test",
-        "familyName": "Test",
+        "first_name": "Test",
+        "family_name": "Test",
         "email": "test@example.com",
         "is_active": True
     }
@@ -201,16 +201,16 @@ def test_get_users():
         {
             "id": 1,
             "username": "test",
-            "firstName": "Test",
-            "familyName": "Test",
+            "first_name": "Test",
+            "family_name": "Test",
             "email": "test@example.com",
             "is_active": True
         },
         {
             "id": 2,
             "username": "test1",
-            "firstName": "Test",
-            "familyName": "Test",
+            "first_name": "Test",
+            "family_name": "Test",
             "email": "test1@example.com",
             "is_active": True,
         }
@@ -268,8 +268,8 @@ def test_put_current_user():
     expected_data = {
         "id": 2,
         "username": "tester",
-        "firstName": "Test",
-        "familyName": "Test",
+        "first_name": "Test",
+        "family_name": "Test",
         "email": "new_test@example.com",
         "is_active": True
     }
