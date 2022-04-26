@@ -17,7 +17,9 @@ class PlaylistCreate(PlaylistBase):
     tags: Optional[List[str]]
 
 class PlaylistUpdate(BaseModel):
-    new_name: str
+    new_name: Optional[str]
+    songs: Optional[List[str]]
+    tags: Optional[List[str]]
 
 class Playlist(PlaylistBase):
     id: int

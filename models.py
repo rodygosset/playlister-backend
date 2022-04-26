@@ -28,7 +28,7 @@ class Tag(Base):
     __tablename__ = "tag"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, index=True)
+    name = Column(String, index=True)
     user_id = Column(Integer, ForeignKey('user.id'))
     songs = relationship("TagSong")
     playlists = relationship("TagPlaylist")
@@ -52,7 +52,7 @@ class Genre(Base):
     __tablename__ = "genre"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, index=True)
+    name = Column(String, index=True, nullable=False)
     user_id = Column(Integer, ForeignKey('user.id'))
     songs = relationship("GenreSong")
 
@@ -67,7 +67,7 @@ class Artist(Base):
     __tablename__ = "artist"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, index=True)
+    name = Column(String, index=True, nullable=False)
     user_id = Column(Integer, ForeignKey('user.id'))
     songs = relationship("ArtistSong")
 
@@ -83,7 +83,7 @@ class Song(Base):
     __tablename__ = "song"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, index=True, nullable=False)
+    name = Column(String, index=True, nullable=False)
     key = Column(String, nullable=False)
     bpm = Column(Integer, nullable=False)
     url = Column(String, unique=True, nullable=False)
@@ -107,7 +107,7 @@ class Playlist(Base):
     __tablename__ = "playlist"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, unique=True, index=True, nullable=False)
+    name = Column(String, index=True, nullable=False)
     user_id = Column(Integer, ForeignKey('user.id'))
     tags = relationship("TagPlaylist")
     songs = relationship("SongPlaylist")

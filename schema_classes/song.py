@@ -22,7 +22,6 @@ class SongCreate(SongBase):
     tags: Optional[List[str]]
     genres: Optional[List[str]]
     artists: Optional[List[str]]
-    playlists: Optional[List[str]]
 
 
 class SongUpdate(BaseModel):
@@ -33,6 +32,9 @@ class SongUpdate(BaseModel):
     duration: Optional[timedelta]
     release_date: Optional[date]
     user_id: Optional[int]
+    tags: Optional[List[str]]
+    genres: Optional[List[str]]
+    artists: Optional[List[str]]
 
 class Song(SongBase):
     id: int
