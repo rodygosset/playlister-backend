@@ -10,7 +10,7 @@ from pydantic import BaseModel
 # defining our Song schema
 
 class SongBase(BaseModel):
-    name: str
+    title: str
     key: str
     bpm: int
     url: str
@@ -21,11 +21,11 @@ class SongBase(BaseModel):
 class SongCreate(SongBase):
     tags: Optional[List[str]]
     genres: Optional[List[str]]
-    artists: Optional[List[str]]
+    artists: List[str]
 
 
 class SongUpdate(BaseModel):
-    new_name: Optional[str]
+    new_title: Optional[str]
     key: Optional[str]
     bpm: Optional[int]
     url: Optional[str]

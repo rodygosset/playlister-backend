@@ -83,7 +83,7 @@ class Song(Base):
     __tablename__ = "song"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True, nullable=False)
+    title = Column(String, index=True, nullable=False)
     key = Column(String, nullable=False)
     bpm = Column(Integer, nullable=False)
     url = Column(String, unique=True, nullable=False)

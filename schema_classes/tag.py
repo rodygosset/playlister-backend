@@ -1,3 +1,4 @@
+from typing import List, Optional
 from pydantic import BaseModel
 
 
@@ -10,6 +11,8 @@ from pydantic import BaseModel
 class TagBase(BaseModel):
     name: str
     user_id: int
+    songs: Optional[List[str]]
+    playlists: Optional[List[str]]
 
 class TagCreate(TagBase):
     pass

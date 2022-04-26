@@ -19,7 +19,7 @@ from ..utility import *
 def get_song_tag_objects(db: Session, song: models.Song) -> List[models.Tag]:
     """
 
-    Retrieve all the Tag objects associated to a song object.
+    Retrieve all the Tag objects associated to a Song object.
 
     Args:
         db (Session): The session used to access the database.
@@ -38,7 +38,7 @@ def get_song_tag_objects(db: Session, song: models.Song) -> List[models.Tag]:
 def get_song_tags(db: Session, song: models.Song) -> List[str]:
     """
 
-    Retrieve all the Tag objects associated to a song object.
+    Retrieve all the Tag objects associated to a Song object.
 
     Args:
         db (Session): The session used to access the database.
@@ -56,7 +56,7 @@ def get_song_tags(db: Session, song: models.Song) -> List[str]:
 def get_song_genre_objects(db: Session, song: models.Song) -> List[models.Genre]:
     """
 
-    Retrieve all the Genre objects associated to a song object.
+    Retrieve all the Genre objects associated to a Song object.
 
     Args:
         db (Session): The session used to access the database.
@@ -75,7 +75,7 @@ def get_song_genre_objects(db: Session, song: models.Song) -> List[models.Genre]
 def get_song_genres(db: Session, song: models.Song) -> List[str]:
     """
 
-    Retrieve all the Genre objects associated to a song object.
+    Retrieve all the Genre objects associated to a Song object.
 
     Args:
         db (Session): The session used to access the database.
@@ -92,7 +92,7 @@ def get_song_genres(db: Session, song: models.Song) -> List[str]:
 def get_song_artist_objects(db: Session, song: models.Song) -> List[models.Artist]:
     """
 
-    Retrieve all the Artist objects associated to a song object.
+    Retrieve all the Artist objects associated to a Song object.
 
     Args:
         db (Session): The session used to access the database.
@@ -111,7 +111,7 @@ def get_song_artist_objects(db: Session, song: models.Song) -> List[models.Artis
 def get_song_artists(db: Session, song: models.Song) -> List[str]:
     """
 
-    Retrieve all the Artist objects associated to a song object.
+    Retrieve all the Artist objects associated to a Song object.
 
     Args:
         db (Session): The session used to access the database.
@@ -131,7 +131,7 @@ def get_song_artists(db: Session, song: models.Song) -> List[str]:
 def get_song_playlist_objects(db: Session, song: models.Song) -> List[models.Playlist]:
     """
 
-    Retrieve all the Playlist objects associated to a song object.
+    Retrieve all the Playlist objects associated to a Song object.
 
     Args:
         db (Session): The session used to access the database.
@@ -150,7 +150,7 @@ def get_song_playlist_objects(db: Session, song: models.Song) -> List[models.Pla
 def get_song_playlists(db: Session, song: models.Song) -> List[str]:
     """
 
-    Retrieve all the Playlist objects associated to a song object.
+    Retrieve all the Playlist objects associated to a Song object.
 
     Args:
         db (Session): The session used to access the database.
@@ -167,7 +167,7 @@ def get_song_playlists(db: Session, song: models.Song) -> List[str]:
 def get_song_by_id(db: Session, song_id: int, current_user: schemas.User) -> models.Song:
     """
 
-    Retrieve a song object from from a user's music library using its ID.
+    Retrieve a Song object from from a user's music library using its ID.
 
     Args:
         db (Session): The session used to access the database.
@@ -179,20 +179,32 @@ def get_song_by_id(db: Session, song_id: int, current_user: schemas.User) -> mod
     """
     return db.query(models.Song).filter(models.Song.user_id == current_user.id).filter(models.Song.id == song_id).first()
 
-def get_song_by_name(db: Session, name: str, current_user: schemas.User) -> models.Song:
+def get_song_by_title(db: Session, artist_name: str, song_title: str, current_user: schemas.User) -> models.Song:
     """
 
-    Retrieve a song object from a user's music library using the value of its 'name' cell.
+    Retrieve a Song object from a user's music library using its full name (artist + title).
 
     Args:
         db (Session): The session used to access the database.
-        name (str): The value of the record's 'name' cell.
+        artist_name (str): One of the Artist objects associated to that song.
+        song_title (str): The value of the record's 'title' cell.
         current_user (schemas.User): The user who's song library we're working in.
 
     Returns:
         [models.Song]: The Song (if found), None (if not found).
     """
-    return db.query(models.Song).filter(models.Song.user_id == current_user.id).filter(models.Song.name == name).first()
+    # get all songs matching song_title
+    db_songs = db.query(models.Song).filter(models.Song.user_id == current_user.id).filter(models.Song.title == song_title).all()
+    # for each song, get a list of the artists associated to it
+    artists = [get_song_artists(db, db_song) for db_song in db_songs]
+    # filter the list to get the one that's associated to the specified artist
+    i = 0
+    while i < len(artists):
+        if artist_name in artists[i]:
+            return db_songs[i]
+    raise_http_404(f"Song '{song_title}' by artist '{artist_name}' not found.")
+
+
 
 def get_songs_from_db(db: Session, max: int, current_user: schemas.User) -> List[models.Song]:
     """
@@ -252,19 +264,21 @@ def create_song(db: Session, new_song: schemas.SongCreate, current_user: schemas
         for tag in tags:
             db_tag = get_tag_by_name(db, tag, current_user)
             if not db_tag:
-                raise_http_404(f"Cannot add song '{new_song.name}' to the library because tag '{tag}' does not exist.")
+                raise_http_404(f"Cannot add song '{new_song.title}' to the library because tag '{tag}' does not exist.")
     # make sure all the genres listed do exist in the database
     if genres is not None:
         for genre in genres:
             db_genre = get_genre_by_name(db, genre, current_user)
             if not db_genre:
-                raise_http_404(f"Cannot add song '{new_song.name}' to the library because genre '{genre}' does not exist.")
+                raise_http_404(f"Cannot add song '{new_song.title}' to the library because genre '{genre}' does not exist.")
     # make sure all the artists listed do exist in the database
-    if artists is not None:
+    if len(artists) == 0:
+        raise_http_400(f"Cannot add song '{new_song.title}' because no artists were specified.")
+    else:
         for artist in artists:
             db_artist = get_artist_by_name(db, artist, current_user)
             if not db_artist:
-                raise_http_404(f"Cannot add song '{new_song.name}' to the library because artist '{artist}' does not exist.")
+                raise_http_404(f"Cannot add song '{new_song.title}' to the library because artist '{artist}' does not exist.")
     db_song = models.Song(**new_song_dict)
     db.add(db_song)
     db.commit()
@@ -290,20 +304,21 @@ def create_song(db: Session, new_song: schemas.SongCreate, current_user: schemas
     return db_song
 
 
-def delete_song(db: Session, name: str, current_user: schemas.User) -> models.Song:
+def delete_song(db: Session, artist_name: str, song_title: str, current_user: schemas.User) -> models.Song:
     """
 
     Delete a song object from a user's music library.
 
     Args:
         db (Session): The session used to access the database.
-        name (str): The value of the record's 'name' cell.
+        artist_name (str): One of the Artist objects associated to that song.
+        song_title (str): The value of the record's 'title' cell.
         current_user (schemas.User): The user who's song library we're working in.
 
     Returns:
         models.Song: The deleted Song object.
     """
-    db_song = get_song_by_name(db, name, current_user)
+    db_song = get_song_by_title(db, artist_name, song_title, current_user)
     if db_song is None:
         return None
     # on delete, we need to delete all the TagSong objects associated to this one
@@ -364,7 +379,7 @@ def update_song_tags(db: Session, db_song: models.Song, song: schemas.SongUpdate
             # make sure it already exists in the database
             db_tag = get_tag_by_name(db, tag, current_user)
             if not db_tag:
-                raise_http_404(f"Cannot add tag '{tag}' to song '{db_song.name}' because the tag does not exist.")
+                raise_http_404(f"Cannot add tag '{tag}' to song '{db_song.title}' because the tag does not exist.")
             # associate the tag to the Song object
             tag_song_item = schemas.TagSongCreate(song_id=db_song.id, tag_id=db_tag.id)
             crud.create_tag_song(db, tag_song_item)
@@ -407,7 +422,7 @@ def update_song_genres(db: Session, db_song: models.Song, song: schemas.SongUpda
             # make sure it already exists in the database
             db_genre = get_genre_by_name(db, genre, current_user)
             if not db_genre:
-                raise_http_404(f"Cannot add genre '{genre}' to song '{db_song.name}' because the genre does not exist.")
+                raise_http_404(f"Cannot add genre '{genre}' to song '{db_song.title}' because the genre does not exist.")
             # associate the genre to the Song object
             genre_song_item = schemas.GenreSongCreate(song_id=db_song.id, genre_id=db_genre.id)
             crud.create_genre_song(db, genre_song_item)
@@ -435,6 +450,8 @@ def update_song_artists(db: Session, db_song: models.Song, song: schemas.SongUpd
     """
     if song.artists is None:
         return False
+    if len(song.artists) == 0:
+        raise_http_400("The list of artists associated to a song cannot be empty.")
     current_artists = get_song_artists(db, db_song)
     # start with checking whether some artists were disassociated from the Song object
     for current_artist in current_artists:
@@ -450,7 +467,7 @@ def update_song_artists(db: Session, db_song: models.Song, song: schemas.SongUpd
             # make sure it already exists in the database
             db_artist = get_artist_by_name(db, artist, current_user)
             if not db_artist:
-                raise_http_404(f"Cannot add artist '{artist}' to song '{db_song.name}' because the artist does not exist.")
+                raise_http_404(f"Cannot add artist '{artist}' to song '{db_song.title}' because the artist does not exist.")
             # associate the artist to the Song object
             artist_song_item = schemas.ArtistSongCreate(song_id=db_song.id, artist_id=db_artist.id)
             crud.create_artist_song(db, artist_song_item)
@@ -460,41 +477,41 @@ def update_song_artists(db: Session, db_song: models.Song, song: schemas.SongUpd
 # make changes to a song object
 # used by the PUT API endpoint for Song objects
 
-def update_song(db: Session, name: str, song: schemas.SongUpdate, current_user: schemas.User) -> models.Song:
+def update_song(db: Session, artist_name: str, song_title: str, song: schemas.SongUpdate, current_user: schemas.User) -> models.Song:
     """
 
     Update a Song object.
 
     Args:
         db (Session): The session used to access the database.
-        updater (str): The username of the User making the changes.
-        name (str): The value of the record's 'name' cell.
+        artist_name (str): One of the Artist objects associated to that song.
+        song_title (str): The value of the record's 'title' cell.
         song (schemas.SongUpdate): The object containing the changes to be made.
         current_user (schemas.User): The user who's song library we're working in.
 
     Returns:
         models.Song: The updated Song object.
     """
-    db_song = get_song_by_name(db, name, current_user)
+    db_song = get_song_by_title(db, artist_name, song_title, current_user)
     if db_song is None:
         return None
+    # start with updating the list of artists associated to the Song object
+    if song.artists is not None:
+        update_song_artists(db, db_song, song, current_user)
     # start with updating the list of tags associated to the Song object
     if song.tags is not None:
         update_song_tags(db, db_song, song, current_user)
     # start with updating the list of genres associated to the Song object
     if song.genres is not None:
         update_song_genres(db, db_song, song, current_user)
-    # start with updating the list of artists associated to the Song object
-    if song.artists is not None:
-        update_song_artists(db, db_song, song, current_user)
     # update each field present in the SongUpdate object in the database Song object
-    # except for new_name, which we don't need to store
+    # except for new_title, which we don't need to store
     for var, value in vars(song).items():
-        if var == "new_name" or var == "tags" or var == "genres" or var == "artists":
+        if var == "new_title" or var == "tags" or var == "genres" or var == "artists":
             continue
         setattr(db_song, var, value) if value else None
-    if song.new_name is not None:
-        db_song.name = song.new_name
+    if song.new_title is not None:
+        db_song.title = song.new_title
     db.add(db_song)
     db.commit()
     db.refresh(db_song)
