@@ -17,6 +17,11 @@ from .utility import *
 # import our routers
 
 from .routers import users
+from .routers import tags
+from .routers import genres
+from .routers import artists
+from .routers import songs
+from .routers import playlists
 
 # init
 
@@ -44,6 +49,11 @@ app.add_middleware(
 # these take care of all the endpoints not related directly to the root of the API
 
 app.include_router(users.router)
+app.include_router(tags.router)
+app.include_router(genres.router)
+app.include_router(artists.router)
+app.include_router(songs.router)
+app.include_router(playlists.router)
 
 
 # the endpoint /token will be used by the frontend to login 

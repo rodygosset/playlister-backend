@@ -11,8 +11,8 @@ class GenreBase(BaseModel):
     name: str
     user_id: int
 
-class GenreCreate(GenreBase):
-    pass
+class GenreCreate(BaseModel):
+    name: str
 
 class GenreUpdate(BaseModel):
     new_name: str

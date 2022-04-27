@@ -1,7 +1,6 @@
 from typing import List
 from fastapi import APIRouter, Depends
 
-import models
 from .. import schemas, crud
 from ..auth import *
 from ..utility import *
@@ -33,14 +32,7 @@ def get_artist_using_name(name: str, current_user: schemas.User = Depends(users.
     db_artist = crud.get_artist_by_name(db, name, current_user)
     if not db_artist:
         raise_http_404(f"Artist '{name}' does not exist.")
-    # get the list of songs associated to this artist object
-    song_ids = [song_artist.song_id for song_artist in crud.get_artist_artist_song_objects(db, db_artist)]
-    songs = [song.name for song in db.query(models.Song).filter(models.Song.id.in_(song_ids)).all()]
-    # get the list of playlists associated to this artist object
-    playlist_ids = [playlist_artist.playlist_id for playlist_artist in crud.get_artist_artist_playlist_objects(db, db_artist)]
-    playlists = [playlist.name for playlist in db.query(models.Playlist).filter(models.Playlist.id.in_(playlist_ids)).all()]
-    artist = { **db_artist.__dict__, "songs": songs, "playlists": playlists }
-    return artist
+    return db_artist
 
 # add a new 'Artist' object to the database
 
@@ -49,7 +41,7 @@ def post_artist(artist: schemas.ArtistCreate, current_user: schemas.User = Depen
     # make sure an object with the same name doesn't already exist in the DB
     if crud.get_artist_by_name(db, artist.name, current_user) is not None:
         raise_http_409(f"Artist '{artist.name}' already exists.'")
-    return crud.create_artist(db, artist)
+    return crud.create_artist(db, artist, current_user)
 
 # make changes to a Artist object
 
@@ -63,7 +55,7 @@ def put_artist(name: str, artist: schemas.ArtistUpdate, current_user: schemas.Us
     # make sure there isn't already a artist using that same name
     if crud.get_artist_by_name(db, artist.new_name, current_user) is not None:
         raise_http_409(f"Artist '{artist.new_name}' already exists.")
-    return crud.update_artist(db, name, artist)
+    return crud.update_artist(db, name, artist, current_user)
 
 
 
@@ -72,7 +64,7 @@ def put_artist(name: str, artist: schemas.ArtistUpdate, current_user: schemas.Us
 @router.delete("/api/artists/{name}", response_model=schemas.Artist)
 def delete_artist(name: str, current_user: schemas.User = Depends(users.read_users_me), db: Session = Depends(get_db)):
     # make sure the object to be modified exists
-    db_artist = crud.get_artist_by_name(db, name)
+    db_artist = crud.get_artist_by_name(db, name, current_user)
     if not db_artist:
         raise_http_404(f"Artist '{name}' does not exist.")
     return crud.delete_artist_from_db(db, name, current_user)

@@ -11,8 +11,8 @@ class ArtistBase(BaseModel):
     name: str
     user_id: int
 
-class ArtistCreate(ArtistBase):
-    pass
+class ArtistCreate(BaseModel):
+    name: str
 
 class ArtistUpdate(BaseModel):
     new_name: str

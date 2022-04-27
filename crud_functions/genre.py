@@ -1,7 +1,7 @@
 from typing import List
 from sqlalchemy.orm import Session
 
-from crud_functions.utils import get_full_song_title
+from ..crud_functions.utils import get_full_song_title
 
 from .. import models, schemas, crud
 
@@ -93,7 +93,7 @@ def get_all_genres(db: Session, current_user: schemas.User) -> List[models.Genre
     return db.query(models.Genre).filter(models.Genre.user_id == current_user.id).all()
 
 
-def create_genre(db: Session, genre: schemas.GenreCreate) -> models.Genre:
+def create_genre(db: Session, genre: schemas.GenreCreate, current_user: schemas.User) -> models.Genre:
     """
 
     Create a new Genre object and save it into the database.
@@ -101,11 +101,13 @@ def create_genre(db: Session, genre: schemas.GenreCreate) -> models.Genre:
     Args:
         db (Session): The session used to access the database.
         genre (schemas.GenreCreate): The object to be created.
+        current_user (schemas.User): The user who's music library we're working in.
 
     Returns:
         models.Genre: The newly created object.
     """
-    db_genre = models.Genre(**genre.dict())
+    new_genre_dict = { **genre.dict(), "user_id": current_user.id }
+    db_genre = models.Genre(**new_genre_dict)
     db.add(db_genre)
     db.commit()
     db.refresh(db_genre)

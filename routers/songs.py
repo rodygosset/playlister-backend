@@ -1,7 +1,9 @@
 from typing import List
 from fastapi import APIRouter, Depends
 
-from .. import schemas, crud
+from ..search_functions.utils import search_check_boundaries
+
+from .. import schemas, crud, search
 from ..auth import *
 from ..utility import *
 from . import users
@@ -72,6 +74,31 @@ def post_song(song: schemas.SongCreate, current_user: schemas.User = Depends(use
     return song
 
 
+
+# search Song objects matching the parameters in the provided schemas.SongSearchParams object
+
+@router.post("/api/songs/search/", response_model=List[schemas.Song])
+def search_songs(
+    search_params: schemas.SongSearchParams, 
+    skip: Optional[int] = None, 
+    max: Optional[int] = None, 
+    current_user: schemas.User = Depends(users.read_users_me), 
+    db: Session = Depends(get_db)
+):
+    search_check_boundaries(skip, max)
+    db_songs = search.search_songs(db, search_params, skip, max)
+    songs = [{**db_song.__dict__, "tags": crud.get_song_tags(db, db_song), "genres": crud.get_song_genres(db, db_song), "artists": crud.get_song_artists(db, db_song)} for db_song in db_songs]
+    return songs
+
+# get the number of Song objects matching the parameters in the provided schemas.SongSearchParams object
+
+@router.post("/api/songs/search/nb")
+def search_songs_nb(search_params: schemas.SongSearchParams, current_user: schemas.User = Depends(users.read_users_me), db: Session = Depends(get_db)):
+    db_songs = search.search_songs(db, search_params)
+    return {"nb_results": len(db_songs)}
+
+
+# make changes to a Song object's data
 
 @router.put("/api/artists/{artist_name}/{song_title}", response_model=schemas.Song)
 def put_song(artist_name: str, song_title: str, song: schemas.SongUpdate, current_user: schemas.User = Depends(users.read_users_me), db: Session = Depends(get_db)):

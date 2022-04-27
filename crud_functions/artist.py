@@ -1,7 +1,7 @@
 from typing import List
 from sqlalchemy.orm import Session
 
-from crud_functions.utils import get_full_song_title
+from ..crud_functions.utils import get_full_song_title
 
 from .. import models, schemas, crud
 
@@ -93,7 +93,7 @@ def get_all_artists(db: Session, current_user: schemas.User) -> List[models.Arti
     return db.query(models.Artist).filter(models.Artist.user_id == current_user.id).all()
 
 
-def create_artist(db: Session, artist: schemas.ArtistCreate) -> models.Artist:
+def create_artist(db: Session, artist: schemas.ArtistCreate, current_user: schemas.User) -> models.Artist:
     """
 
     Create a new Artist object and save it into the database.
@@ -101,11 +101,13 @@ def create_artist(db: Session, artist: schemas.ArtistCreate) -> models.Artist:
     Args:
         db (Session): The session used to access the database.
         artist (schemas.ArtistCreate): The object to be created.
+        current_user (schemas.User): The user who's music library we're working in.
 
     Returns:
         models.Artist: The newly created object.
     """
-    db_artist = models.Artist(**artist.dict())
+    new_artist_dict = { **artist.dict(), "user_id": current_user.id }
+    db_artist = models.Artist(**new_artist_dict)
     db.add(db_artist)
     db.commit()
     db.refresh(db_artist)

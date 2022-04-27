@@ -25,6 +25,11 @@ class PlaylistUpdate(BaseModel):
     songs: Optional[List[str]]
     tags: Optional[List[str]]
 
+class PlaylistSearchParams(BaseModel):
+    name: Optional[str]
+    songs: Optional[List[str]]
+    tags: Optional[List[str]]
+
 class Playlist(PlaylistBase):
     id: int
 

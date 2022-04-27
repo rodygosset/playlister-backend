@@ -1,7 +1,9 @@
 from typing import List
 from fastapi import APIRouter, Depends
 
-from .. import schemas, crud, models
+from ..search_functions.utils import search_check_boundaries
+
+from .. import schemas, crud, search
 from ..auth import *
 from ..utility import *
 from . import users
@@ -56,6 +58,31 @@ def post_playlist(playlist: schemas.PlaylistCreate, current_user: schemas.User =
     if crud.get_playlist_by_name(db, playlist.name, current_user) is not None:
         raise_http_409(f"Playlist '{playlist.name}' already exists.'")
     return crud.create_playlist(db, playlist, current_user)
+
+
+# search Playlist objects matching the parameters in the provided schemas.PlaylistSearchParams object
+
+@router.post("/api/playlists/search/", response_model=List[schemas.Playlist])
+def search_playlists(
+    search_params: schemas.PlaylistSearchParams, 
+    skip: Optional[int] = None, 
+    max: Optional[int] = None, 
+    current_user: schemas.User = Depends(users.read_users_me), 
+    db: Session = Depends(get_db)
+):
+    search_check_boundaries(skip, max)
+    db_playlists = search.search_playlists(db, search_params, skip, max)
+    playlists = [{**db_playlist.__dict__, "tags": crud.get_playlist_tags(db, db_playlist), "songs": crud.get_playlist_songs(db, db_playlist)} for db_playlist in db_playlists]
+    return playlists
+
+# get the number of Playlist objects matching the parameters in the provided schemas.PlaylistSearchParams object
+
+@router.post("/api/playlists/search/nb")
+def search_playlists_nb(search_params: schemas.PlaylistSearchParams, current_user: schemas.User = Depends(users.read_users_me), db: Session = Depends(get_db)):
+    db_playlists = search.search_playlists(db, search_params)
+    return {"nb_results": len(db_playlists)}
+
+
 
 # make changes to a Playlist object
 

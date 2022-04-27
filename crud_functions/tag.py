@@ -1,7 +1,7 @@
 from typing import List
 from sqlalchemy.orm import Session
 
-from crud_functions.utils import get_full_song_title
+from ..crud_functions.utils import get_full_song_title
 
 from .. import models, schemas, crud
 
@@ -131,7 +131,7 @@ def get_all_tags(db: Session, current_user: schemas.User) -> List[models.Tag]:
     return db.query(models.Tag).filter(models.Tag.user_id == current_user.id).all()
 
 
-def create_tag(db: Session, tag: schemas.TagCreate) -> models.Tag:
+def create_tag(db: Session, tag: schemas.TagCreate, current_user: schemas.User) -> models.Tag:
     """
 
     Create a new Tag object and save it into the database.
@@ -139,11 +139,13 @@ def create_tag(db: Session, tag: schemas.TagCreate) -> models.Tag:
     Args:
         db (Session): The session used to access the database.
         tag (schemas.TagCreate): The object to be created.
+        current_user (schemas.User): The user who's music library we're working in.
 
     Returns:
         models.Tag: The newly created object.
     """
-    db_tag = models.Tag(**tag.dict())
+    new_tag_dict = { **tag.dict(), "user_id": current_user.id }
+    db_tag = models.Tag(**new_tag_dict)
     db.add(db_tag)
     db.commit()
     db.refresh(db_tag)
@@ -177,7 +179,7 @@ def delete_tag_from_db(db: Session, name: str, current_user: schemas.User) -> mo
 
 
 
-def update_tag(db: Session, name: str, tag: schemas.TagUpdate) -> models.Tag:
+def update_tag(db: Session, name: str, tag: schemas.TagUpdate, current_user: schemas.User) -> models.Tag:
     """
 
     Update a Tag object.
@@ -186,11 +188,13 @@ def update_tag(db: Session, name: str, tag: schemas.TagUpdate) -> models.Tag:
         db (Session): The session used to access the database.
         name (str): The value of the record's 'name' cell.
         tag (schemas.TagUpdate): The object containing the information to be updated.
+        current_user (schemas.User): The user who's music library we're working in.
+
 
     Returns:
         models.Tag: The updated object.
     """
-    db_tag = get_tag_by_name(db, name)
+    db_tag = get_tag_by_name(db, name, current_user)
     db_tag.name = tag.new_name
     db.add(db_tag)
     db.commit()

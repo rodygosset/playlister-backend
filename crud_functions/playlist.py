@@ -2,8 +2,8 @@
 from typing import List
 from sqlalchemy.orm import Session
 
-from crud_functions.song import get_song_by_title
-from crud_functions.utils import unpack_full_song_title
+from ..crud_functions.song import get_song_by_title
+from ..crud_functions.utils import unpack_full_song_title
 
 from .. import crud
 from ..crud_functions.artist import get_artist_by_name

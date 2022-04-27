@@ -2,7 +2,7 @@ import re
 from typing import List
 from sqlalchemy.orm import Session
 
-from utility import raise_http_400
+from ..utility import raise_http_400
 
 from .. import models, crud
 

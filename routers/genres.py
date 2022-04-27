@@ -1,8 +1,7 @@
 from typing import List
 from fastapi import APIRouter, Depends
 
-import models
-from .. import schemas, crud
+from .. import schemas, crud, models
 from ..auth import *
 from ..utility import *
 from . import users
@@ -33,11 +32,7 @@ def get_genre_using_name(name: str, current_user: schemas.User = Depends(users.r
     db_genre = crud.get_genre_by_name(db, name, current_user)
     if not db_genre:
         raise_http_404(f"Genre '{name}' does not exist.")
-    # get the list of songs associated to this genre object
-    song_ids = [song_genre.song_id for song_genre in crud.get_genre_genre_song_objects(db, db_genre)]
-    songs = [song.name for song in db.query(models.Song).filter(models.Song.id.in_(song_ids)).all()]
-    genre = { **db_genre.__dict__, "songs": songs }
-    return genre
+    return db_genre
 
 # add a new 'Genre' object to the database
 
@@ -46,7 +41,7 @@ def post_genre(genre: schemas.GenreCreate, current_user: schemas.User = Depends(
     # make sure an object with the same name doesn't already exist in the DB
     if crud.get_genre_by_name(db, genre.name, current_user) is not None:
         raise_http_409(f"Genre '{genre.name}' already exists.'")
-    return crud.create_genre(db, genre)
+    return crud.create_genre(db, genre, current_user)
 
 # make changes to a Genre object
 
@@ -60,7 +55,7 @@ def put_genre(name: str, genre: schemas.GenreUpdate, current_user: schemas.User 
     # make sure there isn't already a genre using that same name
     if crud.get_genre_by_name(db, genre.new_name, current_user) is not None:
         raise_http_409(f"Genre '{genre.new_name}' already exists.")
-    return crud.update_genre(db, name, genre)
+    return crud.update_genre(db, name, genre, current_user)
 
 
 
@@ -69,7 +64,7 @@ def put_genre(name: str, genre: schemas.GenreUpdate, current_user: schemas.User 
 @router.delete("/api/genres/{name}", response_model=schemas.Genre)
 def delete_genre(name: str, current_user: schemas.User = Depends(users.read_users_me), db: Session = Depends(get_db)):
     # make sure the object to be modified exists
-    db_genre = crud.get_genre_by_name(db, name)
+    db_genre = crud.get_genre_by_name(db, name, current_user)
     if not db_genre:
         raise_http_404(f"Genre '{name}' does not exist.")
     return crud.delete_genre_from_db(db, name, current_user)

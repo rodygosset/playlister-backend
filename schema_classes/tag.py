@@ -11,11 +11,9 @@ from pydantic import BaseModel
 class TagBase(BaseModel):
     name: str
     user_id: int
-    songs: Optional[List[str]]
-    playlists: Optional[List[str]]
 
-class TagCreate(TagBase):
-    pass
+class TagCreate(BaseModel):
+    name: str
 
 class TagUpdate(BaseModel):
     new_name: str
