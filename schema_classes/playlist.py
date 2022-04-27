@@ -1,3 +1,4 @@
+from datetime import timedelta
 from typing import Optional, List
 from pydantic import BaseModel
 
@@ -11,8 +12,11 @@ from pydantic import BaseModel
 class PlaylistBase(BaseModel):
     name: str
     user_id: int
+    tags: List[str]
+    songs: List[str]
 
-class PlaylistCreate(PlaylistBase):
+class PlaylistCreate(BaseModel):
+    name: str
     songs: Optional[List[str]]
     tags: Optional[List[str]]
 
@@ -26,3 +30,4 @@ class Playlist(PlaylistBase):
 
     class Config:
         orm_mode = True
+        

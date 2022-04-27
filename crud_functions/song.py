@@ -202,7 +202,7 @@ def get_song_by_title(db: Session, artist_name: str, song_title: str, current_us
     while i < len(artists):
         if artist_name in artists[i]:
             return db_songs[i]
-    raise_http_404(f"Song '{song_title}' by artist '{artist_name}' not found.")
+    return None
 
 
 
@@ -256,6 +256,7 @@ def create_song(db: Session, new_song: schemas.SongCreate, current_user: schemas
         models.Song: The newly created Song object.
     """
     new_song_dict = new_song.dict()
+    new_song_dict["user_id"] = current_user.id
     tags = new_song_dict.pop("tags")
     genres = new_song_dict.pop("genres")
     artists = new_song_dict.pop("artists")

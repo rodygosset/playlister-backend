@@ -17,8 +17,17 @@ class SongBase(BaseModel):
     duration: timedelta
     release_date: date
     user_id: int
+    tags: List[str]
+    genres: List[str]
+    artists: List[str]
 
 class SongCreate(SongBase):
+    title: str
+    key: str
+    bpm: int
+    url: str
+    duration: timedelta
+    release_date: date
     tags: Optional[List[str]]
     genres: Optional[List[str]]
     artists: List[str]

@@ -1,6 +1,8 @@
 from typing import List
 from sqlalchemy.orm import Session
 
+from crud_functions.utils import get_full_song_title
+
 from .. import models, schemas, crud
 
 # some of those CRUD operations require the user to be authenticated
@@ -25,6 +27,26 @@ def get_tag_tag_song_objects(db: Session, tag: models.Tag) -> List[models.TagSon
     tag_song_items = db.query(models.TagSong).filter(models.TagSong.tag_id == tag.id).all()
     return tag_song_items
 
+def get_tag_songs(db: Session, tag: models.Tag, current_user: schemas.User) -> List[str]:
+    """
+
+    Retrieve all the Song objects associated to a Tag object.
+
+    Args:
+        db (Session): The session used to access the database.
+        tag (models.Tag): The provided Tag object.
+        current_user (schemas.User): The user who's music library we're working in.
+
+    Returns:
+        List[str]: The full title for each of the retrieved Song objects.
+    """
+    if tag is None:
+        return None
+    tag_song_items = get_tag_tag_song_objects(db, tag)
+    song_ids = [tag_song_item.song_id for tag_song_item in tag_song_items]
+    db_songs = [crud.get_song_by_id(db, song_id, current_user) for song_id in song_ids]
+    return [get_full_song_title(db, db_song) for db_song in db_songs]
+
 def get_tag_tag_playlist_objects(db: Session, tag: models.Tag) -> List[models.TagPlaylist]:
     """
 
@@ -41,6 +63,27 @@ def get_tag_tag_playlist_objects(db: Session, tag: models.Tag) -> List[models.Ta
         return None
     tag_playlist_items = db.query(models.TagPlaylist).filter(models.TagPlaylist.tag_id == tag.id).all()
     return tag_playlist_items
+
+
+def get_tag_playlists(db: Session, tag: models.Tag, current_user: schemas.User) -> List[str]:
+    """
+
+    Retrieve all the Playlist objects associated to a Tag object.
+
+    Args:
+        db (Session): The session used to access the database.
+        tag (models.Tag): The provided Tag object.
+        current_user (schemas.User): The user who's music library we're working in.
+
+    Returns:
+        List[str]: The full title for each of the retrieved Playlist objects.
+    """
+    if tag is None:
+        return None
+    tag_playlist_items = get_tag_tag_playlist_objects(db, tag)
+    playlist_ids = [tag_playlist_item.playlist_id for tag_playlist_item in tag_playlist_items]
+    db_playlists = [crud.get_playlist_by_id(db, playlist_id, current_user) for playlist_id in playlist_ids]
+    return [db_playlist.name for db_playlist in db_playlists]
 
 
 def get_tag_by_id(db: Session, id: int, current_user: schemas.User) -> models.Tag:

@@ -2,7 +2,8 @@
 from typing import List
 from sqlalchemy.orm import Session
 
-from crud_functions.song import get_song_by_name
+from crud_functions.song import get_song_by_title
+from crud_functions.utils import unpack_full_song_title
 
 from .. import crud
 from ..crud_functions.artist import get_artist_by_name
@@ -47,12 +48,12 @@ def get_playlist_songs(db: Session, playlist: models.Playlist) -> List[str]:
         playlist (models.Playlist): The provided Playlist object.
 
     Returns:
-        List[str]: The names of the retrieved Song objects.
+        List[str]: The title for each of the retrieved Song objects.
     """
     if playlist is None:
         return None
     playlist_songs = get_playlist_song_objects(db, playlist)
-    return [playlist_song.name for playlist_song in playlist_songs]
+    return [playlist_song.title for playlist_song in playlist_songs]
 
 
 
@@ -172,6 +173,7 @@ def create_playlist(db: Session, new_playlist: schemas.PlaylistCreate, current_u
         models.Playlist: The newly created Playlist object.
     """
     new_playlist_dict = new_playlist.dict()
+    new_playlist_dict["user_id"] = current_user.id
     tags = new_playlist_dict.pop("tags")
     songs = new_playlist_dict.pop("songs")
     # make sure all the tags listed do exist in the database
@@ -182,8 +184,9 @@ def create_playlist(db: Session, new_playlist: schemas.PlaylistCreate, current_u
                 raise_http_404(f"Cannot add playlist '{new_playlist.name}' to the library because tag '{tag}' does not exist.")
     # make sure all the songs listed do exist in the database
     if songs is not None:
-        for song in songs:
-            db_song = get_song_by_name(db, song, current_user)
+        for full_song_title in songs:
+            artist, song_title = unpack_full_song_title(full_song_title)
+            db_song = get_song_by_title(db, artist, song_title, current_user)
             if not db_song:
                 raise_http_404(f"Cannot add playlist '{new_playlist.name}' to the library because song '{song}' does not exist.")
     db_playlist = models.Playlist(**new_playlist_dict)
@@ -198,8 +201,9 @@ def create_playlist(db: Session, new_playlist: schemas.PlaylistCreate, current_u
             crud.create_tag_playlist(db, tag_playlist_item)
     # associate the newly created Playlist object to the provided Song objects
     if songs is not None:
-        for song in songs:
-            db_song = get_song_by_name(db, song, current_user)
+        for full_song_title in songs:
+            artist, song_title = unpack_full_song_title(full_song_title)
+            db_song = get_song_by_title(db, artist, song_title, current_user)
             song_playlist_item = schemas.SongPlaylistCreate(playlist_id=db_playlist.id, song_id=db_song.id)
             crud.create_song_playlist(db, song_playlist_item)
     return db_playlist
@@ -260,20 +264,24 @@ def update_playlist_songs(db: Session, db_playlist: models.Playlist, playlist: s
         return False
     current_songs = get_playlist_songs(db, db_playlist)
     # start with checking whether some songs were disassociated from the Playlist object
-    for current_song in current_songs:
-        if current_song not in playlist.songs:
+    for full_song_title in current_songs:
+        if full_song_title not in playlist.songs:
             # if a song's been removed
-            db_song = get_song_by_name(db, current_song, current_user)
-            song_playlist_item = crud.get_song_playlist_by_key(db, db_song.id, db_playlist.id)
-            crud.delete_song_playlist_from_db(db, song_playlist_item.id)
-    # now check if any file has been added
-    for song in playlist.songs:
-        if song not in current_songs:
+            artist, song_title = unpack_full_song_title(full_song_title)
+            db_song = get_song_by_title(db, artist, song_title, current_user)
+            if db_song is not None:
+                song_playlist_item = crud.get_song_playlist_by_key(db, db_song.id, db_playlist.id)
+                if song_playlist_item is not None:
+                    crud.delete_song_playlist_from_db(db, song_playlist_item.id)
+    # now check if any song has been added
+    for full_song_title in playlist.songs:
+        if full_song_title not in current_songs:
             # if a song's been added
             # make sure it already exists in the database
-            db_song = get_song_by_name(db, song, current_user)
+            artist, song_title = unpack_full_song_title(full_song_title)
+            db_song = get_song_by_title(db, artist, song_title, current_user)
             if not db_song:
-                raise_http_404(f"Cannot add song '{song}' to playlist '{db_playlist.name}' because the song does not exist.")
+                raise_http_404(f"Cannot add song '{full_song_title}' to playlist '{db_playlist.name}' because the song does not exist.")
             # associate the song to the Playlist object
             song_playlist_item = schemas.SongPlaylistCreate(playlist_id=db_playlist.id, song_id=db_song.id)
             crud.create_song_playlist(db, song_playlist_item)

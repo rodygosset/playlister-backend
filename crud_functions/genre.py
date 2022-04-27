@@ -1,6 +1,8 @@
 from typing import List
 from sqlalchemy.orm import Session
 
+from crud_functions.utils import get_full_song_title
+
 from .. import models, schemas, crud
 
 # some of those CRUD operations require the user to be authenticated
@@ -24,6 +26,26 @@ def get_genre_genre_song_objects(db: Session, genre: models.Genre) -> List[model
         return None
     genre_song_items = db.query(models.GenreSong).filter(models.GenreSong.genre_id == genre.id).all()
     return genre_song_items
+
+def get_genre_songs(db: Session, genre: models.Genre, current_user: schemas.User) -> List[str]:
+    """
+
+    Retrieve all the Song objects associated to a Genre object.
+
+    Args:
+        db (Session): The session used to access the database.
+        genre (models.Genre): The provided Genre object.
+        current_user (schemas.User): The user who's music library we're working in.
+
+    Returns:
+        List[str]: The full title for each of the retrieved Song objects.
+    """
+    if genre is None:
+        return None
+    genre_song_items = get_genre_genre_song_objects(db, genre)
+    song_ids = [genre_song_item.song_id for genre_song_item in genre_song_items]
+    db_songs = [crud.get_song_by_id(db, song_id, current_user) for song_id in song_ids]
+    return [get_full_song_title(db, db_song) for db_song in db_songs]
 
 
 def get_genre_by_id(db: Session, id: int, current_user: schemas.User) -> models.Genre:
