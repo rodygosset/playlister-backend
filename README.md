@@ -25,7 +25,7 @@ uvicorn backend.main:app
 
 This API implements [this database diagram](https://dbdiagram.io/d/6266fc5895e7f23c616dff16)  
 To access the full documentation for this API, which indicates how to interact with it using HTTP requests,  
-run the API locally, and go to [localhost:8000/docs](localhost:8000/docs).
+run the API locally, and go to [localhost:8000/docs](http://localhost:8000/docs).
 
 ## Example data & DB population
 
