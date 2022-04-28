@@ -13,7 +13,7 @@ pipenv install
 
 ## Usage
 
-To start the API (from this folder, and assuming it is named 'backend')
+To start the server and run the API  (from this folder, and assuming it is named 'backend')
 
 ```bash
 pipenv shell
@@ -31,7 +31,7 @@ run the API locally, and go to [localhost:8000/docs](http://localhost:8000/docs)
 
 This repository contains some example data, in the form of JSON files,  
 which can be found in the `json/` folder.  
-This data can be POSTed to the API by running the following bash commands (after having started the API): 
+This data can be POSTed to the database (through the API) by running the following bash commands (after having started the server): 
 
 ```bash
 pipenv shell
