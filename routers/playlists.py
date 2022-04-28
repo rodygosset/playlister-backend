@@ -1,3 +1,4 @@
+from re import T
 from typing import List
 from fastapi import APIRouter, Depends
 
@@ -57,8 +58,13 @@ def post_playlist(playlist: schemas.PlaylistCreate, current_user: schemas.User =
     # make sure an object with the same name doesn't already exist in the DB
     if crud.get_playlist_by_name(db, playlist.name, current_user) is not None:
         raise_http_409(f"Playlist '{playlist.name}' already exists.'")
-    return crud.create_playlist(db, playlist, current_user)
-
+    db_playlist = crud.create_playlist(db, playlist, current_user)
+    # get the list of songs associated to this Playlist object
+    songs = crud.get_playlist_songs(db, db_playlist)
+    # get the list of tags associated to this Playlist object
+    tags = crud.get_playlist_tags(db, db_playlist)
+    new_playlist = { **db_playlist.__dict__, "tags": tags, "songs": songs }
+    return new_playlist
 
 # search Playlist objects matching the parameters in the provided schemas.PlaylistSearchParams object
 
@@ -71,7 +77,7 @@ def search_playlists(
     db: Session = Depends(get_db)
 ):
     search_check_boundaries(skip, max)
-    db_playlists = search.search_playlists(db, search_params, skip, max)
+    db_playlists = search.search_playlists(db, search_params, current_user, skip, max)
     playlists = [{**db_playlist.__dict__, "tags": crud.get_playlist_tags(db, db_playlist), "songs": crud.get_playlist_songs(db, db_playlist)} for db_playlist in db_playlists]
     return playlists
 
@@ -79,7 +85,7 @@ def search_playlists(
 
 @router.post("/api/playlists/search/nb")
 def search_playlists_nb(search_params: schemas.PlaylistSearchParams, current_user: schemas.User = Depends(users.read_users_me), db: Session = Depends(get_db)):
-    db_playlists = search.search_playlists(db, search_params)
+    db_playlists = search.search_playlists(db, search_params, current_user)
     return {"nb_results": len(db_playlists)}
 
 
@@ -96,7 +102,9 @@ def put_playlist(name: str, playlist: schemas.PlaylistUpdate, current_user: sche
     # make sure there isn't already a playlist using that same name
     if crud.get_playlist_by_name(db, playlist.new_name, current_user) is not None:
         raise_http_409(f"Playlist '{playlist.new_name}' already exists.")
-    return crud.update_playlist(db, name, playlist)
+    db_playlist = crud.update_playlist(db, name, playlist, current_user)
+    updated_playlist = { **db_playlist.__dict__, "tags": crud.get_playlist_tags(db, db_playlist), "songs": crud.get_playlist_songs(db, db_playlist) }
+    return updated_playlist
 
 
 
@@ -105,7 +113,9 @@ def put_playlist(name: str, playlist: schemas.PlaylistUpdate, current_user: sche
 @router.delete("/api/playlists/{name}", response_model=schemas.Playlist)
 def delete_playlist(name: str, current_user: schemas.User = Depends(users.read_users_me), db: Session = Depends(get_db)):
     # make sure the object to be modified exists
-    db_playlist = crud.get_playlist_by_name(db, name)
+    db_playlist = crud.get_playlist_by_name(db, name, current_user)
     if not db_playlist:
         raise_http_404(f"Playlist '{name}' does not exist.")
-    return crud.delete_playlist(db, name, current_user)
+    playlist = { **db_playlist.__dict__, "tags": crud.get_playlist_tags(db, db_playlist), "songs": crud.get_playlist_songs(db, db_playlist) }
+    crud.delete_playlist(db, name, current_user)
+    return playlist

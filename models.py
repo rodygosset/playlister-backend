@@ -12,7 +12,7 @@ class User(Base):
     __tablename__ = "user"
 
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True)
+    username = Column(String, unique=True, index=True, nullable=False)
     first_name = Column(String)
     family_name = Column(String)
     email = Column(String, unique=True, index=True)
@@ -86,7 +86,7 @@ class Song(Base):
     title = Column(String, index=True, nullable=False)
     key = Column(String, nullable=False)
     bpm = Column(Integer, nullable=False)
-    url = Column(String, unique=True, nullable=False)
+    url = Column(String, nullable=False)
     duration = Column(Interval, nullable=False)
     release_date = Column(Date)
     user_id = Column(Integer, ForeignKey('user.id'))

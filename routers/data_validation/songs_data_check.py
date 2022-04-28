@@ -1,4 +1,5 @@
 
+import json
 from ... import schemas, crud
 from ...auth import *
 from ...utility import *
@@ -18,11 +19,14 @@ def put_song_data_check(artist_name: str, song_title: str, song: schemas.SongUpd
     if song.new_title is not None: 
         duplicate = None
         artist = None
-        if song.artists is not None:
-            if len(song.artists) != 0:
-                artist = song.artists[0]
-            else: 
-                artist = crud.get_song_artists(db, db_song)[0]
-            duplicate = crud.get_song_by_title(db, artist, song.new_title, current_user)
-            if duplicate is not None:
-                raise_http_409(f"Song '{song.new_title} by {artist}' already exists.")
+        if song.artists is not None and len(song.artists) != 0:
+            for artist in song.artists:
+                duplicate = crud.get_song_by_title(db, artist, song.new_title, current_user)
+                if duplicate is not None:
+                    raise_http_409(f"Song '{song.new_title} by {artist}' already exists.")
+        else: 
+            artists = crud.get_song_artists(db, db_song)
+            for artist in artists:
+                duplicate = crud.get_song_by_title(db, artist, song.new_title, current_user)
+                if duplicate is not None:
+                    raise_http_409(f"Song '{song.new_title} by {artist}' already exists.")

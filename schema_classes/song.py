@@ -21,7 +21,7 @@ class SongBase(BaseModel):
     genres: List[str]
     artists: List[str]
 
-class SongCreate(SongBase):
+class SongCreate(BaseModel):
     title: str
     key: str
     bpm: int
@@ -50,7 +50,8 @@ class SongSearchParams(BaseModel):
     key: Optional[str]
     bpm: Optional[int]
     url: Optional[str]
-    duration: Optional[timedelta]
+    duration_minutes: Optional[int]
+    duration_seconds: Optional[int]
     release_year: Optional[int]
     release_month: Optional[int]
     release_day: Optional[int]

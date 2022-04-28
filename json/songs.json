@@ -1,0 +1,46 @@
+[
+    {
+        "title": "Legacy",
+        "key": "G Major",
+        "bpm": 128,
+        "url": "https://youtu.be/nHn39P1bAT4",
+        "duration": 159,
+        "release_date": "2021-12-10",
+        "tags": ["Energetic"],
+        "genres": ["EDM", "Bass House"],
+        "artists": ["Dirty Palm", "Benix"]
+    },
+    {
+        "title": "Diamonds",
+        "key": "C# Minor",
+        "bpm": 125,
+        "url": "https://www.beatport.com/track/diamonds/16087263",
+        "duration": 203,
+        "release_date": "2021-12-31",
+        "tags": ["Energetic"],
+        "genres": ["Bass House"],
+        "artists": ["Martin Garrix", "Julian Jordan"]
+    },
+    {
+        "title": "Bring The Beat Back",
+        "key": "F# Major",
+        "bpm": 126,
+        "url": "https://youtu.be/J9UppaIIz3E",
+        "duration": 183,
+        "release_date": "2018-12-3",
+        "tags": ["Energetic"],
+        "genres": ["Future House"],
+        "artists": ["RetroVision"]
+    },
+    {
+        "title": "Better When You're Gone",
+        "key": "C# Minor",
+        "bpm": 128,
+        "url": "https://youtu.be/-OrSxiUHk4E",
+        "duration": 192,
+        "release_date": "2019-02-08",
+        "tags": ["Energetic"],
+        "genres": ["Future House"],
+        "artists": ["Brooks", "David Guetta"]
+    }
+]

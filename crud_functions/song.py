@@ -202,6 +202,7 @@ def get_song_by_title(db: Session, artist_name: str, song_title: str, current_us
     while i < len(artists):
         if artist_name in artists[i]:
             return db_songs[i]
+        i += 1
     return None
 
 
@@ -295,7 +296,7 @@ def create_song(db: Session, new_song: schemas.SongCreate, current_user: schemas
         for genre in genres:
             db_genre = get_genre_by_name(db, genre, current_user)
             genre_song_item = schemas.GenreSongCreate(song_id=db_song.id, genre_id=db_genre.id)
-            crud.create_genre_song(db, genre_song_item, current_user)
+            crud.create_genre_song(db, genre_song_item)
     # associate the newly created Song object to the provided artists
     if artists is not None:
         for artist in artists:
@@ -373,7 +374,7 @@ def update_song_tags(db: Session, db_song: models.Song, song: schemas.SongUpdate
             db_tag = get_tag_by_name(db, current_tag, current_user)
             tag_song_item = crud.get_tag_song_by_key(db, db_tag.id, db_song.id)
             crud.delete_tag_song_from_db(db, tag_song_item.id)
-    # now check if any file has been added
+    # now check if any tag has been added
     for tag in song.tags:
         if tag not in current_tags:
             # if a tag's been added
@@ -416,7 +417,7 @@ def update_song_genres(db: Session, db_song: models.Song, song: schemas.SongUpda
             db_genre = get_genre_by_name(db, current_genre, current_user)
             genre_song_item = crud.get_genre_song_by_key(db, db_genre.id, db_song.id)
             crud.delete_genre_song_from_db(db, genre_song_item.id)
-    # now check if any file has been added
+    # now check if any genre has been added
     for genre in song.genres:
         if genre not in current_genres:
             # if a genre's been added
@@ -461,7 +462,7 @@ def update_song_artists(db: Session, db_song: models.Song, song: schemas.SongUpd
             db_artist = get_artist_by_name(db, current_artist, current_user)
             artist_song_item = crud.get_artist_song_by_key(db, db_artist.id, db_song.id)
             crud.delete_artist_song_from_db(db, artist_song_item.id)
-    # now check if any file has been added
+    # now check if any artist has been added
     for artist in song.artists:
         if artist not in current_artists:
             # if an artist's been added

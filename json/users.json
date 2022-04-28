@@ -1,0 +1,30 @@
+[
+    {
+        "username": "amy",
+        "first_name": "Amy",
+        "family_name": "Eben",
+        "email": "ebenamy95@gmail.com",
+        "hashed_password": "playlister"
+    },
+    {
+        "username": "nassim",
+        "first_name": "Nassim",
+        "family_name": "Mansour",
+        "email": "mansournassim7@gmail.com",
+        "hashed_password": "playlister"
+    },
+    {
+        "username": "melissa",
+        "first_name": "Melissa",
+        "family_name": "Ben Saada",
+        "email": "bensaadamelissa2002@gmail.com",
+        "hashed_password": "playlister"
+    },
+    {
+        "username": "rodyt",
+        "first_name": "Rody",
+        "family_name": "Gosset",
+        "email": "rody.gosset@gmail.com",
+        "hashed_password": "playlister"
+    }
+]

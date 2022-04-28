@@ -3,7 +3,7 @@ from typing import List
 from sqlalchemy.orm import Session
 
 from ..crud_functions.song import get_song_by_title
-from ..crud_functions.utils import unpack_full_song_title
+from ..crud_functions.utils import get_full_song_title, unpack_full_song_title
 
 from .. import crud
 from ..crud_functions.artist import get_artist_by_name
@@ -53,7 +53,7 @@ def get_playlist_songs(db: Session, playlist: models.Playlist) -> List[str]:
     if playlist is None:
         return None
     playlist_songs = get_playlist_song_objects(db, playlist)
-    return [playlist_song.title for playlist_song in playlist_songs]
+    return [get_full_song_title(db, playlist_song) for playlist_song in playlist_songs]
 
 
 
@@ -188,7 +188,7 @@ def create_playlist(db: Session, new_playlist: schemas.PlaylistCreate, current_u
             artist, song_title = unpack_full_song_title(full_song_title)
             db_song = get_song_by_title(db, artist, song_title, current_user)
             if not db_song:
-                raise_http_404(f"Cannot add playlist '{new_playlist.name}' to the library because song '{song}' does not exist.")
+                raise_http_404(f"Cannot add playlist '{new_playlist.name}' to the library because song '{full_song_title}' does not exist.")
     db_playlist = models.Playlist(**new_playlist_dict)
     db.add(db_playlist)
     db.commit()
