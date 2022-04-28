@@ -1,6 +1,6 @@
 # Playlister API
 
-This API is the heart of the Playlister App.
+This API is the heart of the Playlister App.  
 It is used by the frontend of the App to manage and access data. 
 
 ## Installation
@@ -25,7 +25,7 @@ uvicorn backend.main:app
 
 This API implements [this database diagram](https://dbdiagram.io/d/6266fc5895e7f23c616dff16)  
 To access the full documentation for this API, which indicates how to interact with it using HTTP requests,  
-run the API locally, and go to <localhost:8000/docs>.
+run the API locally, and go to [localhost:8000/docs](localhost:8000/docs).
 
 ## Example data & DB population
 
