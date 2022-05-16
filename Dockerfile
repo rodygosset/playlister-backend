@@ -1,4 +1,3 @@
-# /!\ This Dockefile must be placed in the parent directory to the project /!\
 
 # Use the official lightweight Python image.
 # https://hub.docker.com/_/python
@@ -11,13 +10,21 @@ WORKDIR /code
 ENV PYTHONUNBUFFERED True
 
 # Get requirements
-COPY ./backend/requirements.txt /code/requirements.txt
+COPY ./requirements.txt /code/requirements.txt
 
 # Install production dependencies.
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
 # Copy local code to the container image.
-COPY ./backend /code/app
+COPY ./ /code/app
 
-# 
+EXPOSE 80
+
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
+
+
+# BUILD IMAGE
+# docker build -t playlister-app-backend .
+
+# RUN IMAGE
+# docker run -it --name playlister-app-backend -p 8000:80 playlister-app-backend 

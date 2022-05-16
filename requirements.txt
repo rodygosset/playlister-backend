@@ -7,3 +7,4 @@ python-multipart
 python-jose
 passlib
 requests 
+uvicorn
