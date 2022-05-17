@@ -18,10 +18,11 @@ RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 # Copy local code to the container image.
 COPY ./ /code/app
 
-EXPOSE 8000
+EXPOSE 5000
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "5000"]
 
+CMD ["gunicorn", "--bind", "0.0.0.0:$PORT" "app.main:app"]
 
 # BUILD IMAGE
 # docker build -t playlister-app-backend .

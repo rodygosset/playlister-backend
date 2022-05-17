@@ -1,0 +1,11 @@
+fastapi
+pytest
+sqlalchemy 
+starlette 
+pydantic 
+python-multipart 
+python-jose
+passlib
+requests 
+uvicorn
+gunicorn
