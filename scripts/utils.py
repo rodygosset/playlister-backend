@@ -4,7 +4,7 @@ from typing import List
 import requests, json
 from requests import Response
 
-
+# SERVER_URL = "http://localhost:8000"
 SERVER_URL = "https://playlister-app-backend.herokuapp.com"
 
 # a collection of useful functions
