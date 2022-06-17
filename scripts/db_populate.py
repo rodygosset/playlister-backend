@@ -18,3 +18,5 @@ for user in users:
     post_json("json/genres.json", SERVER_URL + "/api/genres/", user["username"], user["hashed_password"])
     post_json("json/artists.json", SERVER_URL + "/api/artists/", user["username"], user["hashed_password"])
     post_json("json/songs.json", SERVER_URL + "/api/songs/", user["username"], user["hashed_password"])
+    post_json("json/playlists.json", SERVER_URL + "/api/playlists/", user["username"], user["hashed_password"])
+    
